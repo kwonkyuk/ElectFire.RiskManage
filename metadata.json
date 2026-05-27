@@ -1,0 +1,6 @@
+{
+  "name": "전기화재 위험관리 원격 학습 플랫폼",
+  "description": "동원과학기술대학교 산업안전관리과의 전기화재 위험관리 교과목 원격 학습 웹 플랫폼입니다. 1~15단원 통합 교안, AI 튜터, 아산화동/주울열 시뮬레이터, 화재 패턴 비전 감식기 및 실전 자가진단 평가를 포함합니다.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

@@ -239,4 +239,10 @@ async function startServer() {
   });
 }
 
-startServer();
+// Start standalone server on local machine or Docker Container.
+// Vercel serverless platform will import 'app' and wrap it independently.
+if (process.env.NODE_ENV !== "production" || !process.env.VERCEL) {
+  startServer();
+}
+
+export default app;

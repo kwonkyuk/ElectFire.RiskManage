@@ -42,21 +42,28 @@ export const PracticeExam: React.FC<Props> = ({ chapters, activeChapterId }) => 
         body: JSON.stringify({ topic: currentChapter.topic })
       });
 
+      if (!response.ok) {
+        const errData = await response.json();
+        throw new Error(errData.error);
+      }
+
       const data = await response.json();
       if (data.question) {
         setAiQuestion(data as QuizQuestion);
       } else {
         throw new Error(data.error || "출제 오류");
       }
-    } catch (e) {
+    } catch (e: any) {
       console.error(e);
-      // Fallback custom mock quiz
+      const fallbackMsg = "AI 튜터 통신 서버가 붐비고 있네요. 잠시(2~3초) 후에 다시 시도해 주세요!";
+      const errMsg = e.message || fallbackMsg;
+      // Fallback custom mock quiz containing error details
       setAiQuestion({
         id: 999,
-        question: `[긴급 대체 예비문] ${currentChapter.topic} 부문에서 지락 전하 누전 발생 시, 절연벽 접촉에 의한 대지 전위 변동은 어떤 장비로 가장 먼저 수평 가늠해야 하는가?`,
-        options: ["① 아날로그 서지 보호기", "② 누전차단기(ELB)", "③ 고온 열풍기", "④ 가변 인덕터"],
-        correctAnswerIndex: 1,
-        explanation: "지락 발생 시 피복 누전에 따른 전위 변동은 누전차단기(ELB)가 영상변류기(ZCT) 평형 합을 통해 포착하여 전로를 개방합니다."
+        question: `[긴급 대체 예비문] AI 기출 출제 중 지체 상태를 감지했습니다. (${errMsg})`,
+        options: ["① 학과 데이터 검정 재촉구", "② 차분히 3초 후 재획득 시도", "③ 예비 기출 해설 정독하기", "④ 누전차단기(ELB) 작동 실태 점검"],
+        correctAnswerIndex: 2,
+        explanation: `죄송하네 학우 여러분. 현재 API 지연이나 가용량 초과 상태로 실시간 인공지능 기출을 출제하지 못했으나, 아래를 유념해 주게: \n\n${errMsg}`
       });
     } finally {
       setLoadingAI(false);

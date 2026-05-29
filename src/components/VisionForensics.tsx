@@ -65,15 +65,21 @@ export const VisionForensics: React.FC = () => {
         })
       });
 
+      if (!response.ok) {
+        const errData = await response.json();
+        throw new Error(errData.error);
+      }
+
       const data = await response.json();
       if (data.analysis) {
         setResult(data.analysis);
       } else {
-        throw new Error(data.error || "분석 실패");
+        throw new Error("분석 대화 조직에 공백이 리턴되었습니다.");
       }
     } catch (e: any) {
       console.error(e);
-      setResult(`포렌식 진단 분석 중 오류가 발생했습니다: ${e.message || "연결 유실"}`);
+      const fallbackMsg = "AI 튜터 통신 서버가 붐비고 있네요. 잠시(2~3초) 후에 다시 시도해 주세요!";
+      setResult(`포렌식 진단 분석 실패: ${e.message || fallbackMsg}`);
     } finally {
       setLoading(false);
     }

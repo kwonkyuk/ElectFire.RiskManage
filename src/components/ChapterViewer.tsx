@@ -673,6 +673,11 @@ export const ChapterViewer: React.FC<Props> = ({ chapter, onNavigateToQuiz }) =>
         })
       });
 
+      if (!response.ok) {
+        const errData = await response.json();
+        throw new Error(errData.error);
+      }
+
       const data = await response.json();
       if (data.text) {
         // Split by lines and filter out empty / clean up
@@ -682,9 +687,10 @@ export const ChapterViewer: React.FC<Props> = ({ chapter, onNavigateToQuiz }) =>
           .filter((l: string) => l.length > 3);
         setAiSummary(lines);
       }
-    } catch (e) {
+    } catch (e: any) {
       console.error(e);
-      setAiSummary(["서버와 통신하는 도중 오류가 발생했습니다.", "나중에 다시 시도해 주세요."]);
+      const fallbackMsg = "AI 튜터 통신 서버가 붐비고 있네요. 잠시(2~3초) 후에 다시 시도해 주세요!";
+      setAiSummary([e.message || fallbackMsg]);
     } finally {
       setLoadingSummary(false);
     }

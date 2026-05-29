@@ -49,6 +49,11 @@ export const AITutor: React.FC<Props> = ({ activeTopic }) => {
         })
       });
 
+      if (!response.ok) {
+        const errData = await response.json();
+        throw new Error(errData.error || "통신 오류가 발생했습니다.");
+      }
+
       const data = await response.json();
       if (data.text) {
         setMessages([...updatedMessages, { role: "model" as const, content: data.text }]);
@@ -57,11 +62,15 @@ export const AITutor: React.FC<Props> = ({ activeTopic }) => {
       }
     } catch (e: any) {
       console.error(e);
+      const isCustomError = e.message && (e.message.includes("통신 서버") || e.message.includes("AI 튜터"));
+      const errorText = isCustomError 
+        ? e.message 
+        : `이런! 실시간 학사망 통신 상태가 고르지 못하구나. 한 번 더 차분히 물어봐 주겠니? (오류: ${e.message || "연결 불가"})`;
       setMessages([
         ...updatedMessages,
         {
           role: "model" as const,
-          content: `미안하지만 통신 장애가 발생했네. 잠시 후 서버가 재기조정되면 다시 정식 질문해 주게. (오류: ${e.message || "네트워크 연결 부재"})`
+          content: errorText
         }
       ]);
     } finally {

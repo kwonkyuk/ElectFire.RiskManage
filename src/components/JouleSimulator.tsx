@@ -84,20 +84,21 @@ export const JouleSimulator: React.FC = () => {
         }),
       });
 
-      if (response.ok) {
-        const data = await response.json();
-        if (data.explanation) {
-          setAiReport(data.explanation);
-        } else {
-          setAiReport("리포트를 가져올 수 없습니다.");
-        }
-      } else {
+      if (!response.ok) {
         const errData = await response.json();
-        setAiReport(`오류 발생: ${errData.error || "실증 보고 취득 실패"}`);
+        throw new Error(errData.error);
       }
-    } catch (e) {
+
+      const data = await response.json();
+      if (data.explanation) {
+        setAiReport(data.explanation);
+      } else {
+        throw new Error("리포트 설명 데이터가 비어 있습니다.");
+      }
+    } catch (e: any) {
       console.error(e);
-      setAiReport("서버 통신 지연으로 맞춤형 AI 리포트 로딩에 실패하였습니다.");
+      const fallbackMsg = "AI 튜터 통신 서버가 붐비고 있네요. 잠시(2~3초) 후에 다시 시도해 주세요!";
+      setAiReport(e.message || fallbackMsg);
     } finally {
       setLoadingAI(false);
     }

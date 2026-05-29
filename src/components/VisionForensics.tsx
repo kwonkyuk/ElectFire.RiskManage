@@ -65,9 +65,21 @@ export const VisionForensics: React.FC = () => {
         })
       });
 
+      let errorMsg = "AI 튜터 통신 서버가 붐비고 있네요. 잠시(2~3초) 후에 다시 시도해 주세요!";
       if (!response.ok) {
-        const errData = await response.json();
-        throw new Error(errData.error);
+        const contentType = response.headers.get("content-type");
+        if (contentType && contentType.includes("application/json")) {
+          const errData = await response.json();
+          errorMsg = errData.error || errorMsg;
+        } else {
+          errorMsg = "AI 튜터 서버가 일시적으로 점검 중이거나 재부팅 중입니다. 잠시(3~5초) 후 다시 시도해 주세요!";
+        }
+        throw new Error(errorMsg);
+      }
+
+      const contentType = response.headers.get("content-type");
+      if (!contentType || !contentType.includes("application/json")) {
+        throw new Error("AI 튜터 서버가 일시적으로 점검 중이거나 재부팅 중입니다. 잠시(3~5초) 후 다시 시도해 주세요!");
       }
 
       const data = await response.json();

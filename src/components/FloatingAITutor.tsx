@@ -172,9 +172,21 @@ export const FloatingAITutor: React.FC<Props> = ({ selectedChapterId, onSelectCh
         })
       });
 
+      let errorMsg = "통신 오류가 발생했습니다.";
       if (!response.ok) {
-        const errData = await response.json();
-        throw new Error(errData.error || "통신 오류가 발생했습니다.");
+        const contentType = response.headers.get("content-type");
+        if (contentType && contentType.includes("application/json")) {
+          const errData = await response.json();
+          errorMsg = errData.error || errorMsg;
+        } else {
+          errorMsg = "AI 튜터 서버가 일시적으로 점검 중이거나 재부팅 중입니다. 잠시(3~5초) 후 다시 시도해 주세요!";
+        }
+        throw new Error(errorMsg);
+      }
+
+      const contentType = response.headers.get("content-type");
+      if (!contentType || !contentType.includes("application/json")) {
+        throw new Error("AI 튜터 서버가 일시적으로 점검 중이거나 재부팅 중입니다. 잠시(3~5초) 후 다시 시도해 주세요!");
       }
 
       const data = await response.json();

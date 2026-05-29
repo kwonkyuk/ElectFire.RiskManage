@@ -172,6 +172,11 @@ export const FloatingAITutor: React.FC<Props> = ({ selectedChapterId, onSelectCh
         })
       });
 
+      if (!response.ok) {
+        const errData = await response.json();
+        throw new Error(errData.error || "통신 오류가 발생했습니다.");
+      }
+
       const data = await response.json();
       if (data.text) {
         setMessages([...updatedMessages, { role: "model" as const, content: data.text }]);
@@ -180,11 +185,15 @@ export const FloatingAITutor: React.FC<Props> = ({ selectedChapterId, onSelectCh
       }
     } catch (e: any) {
       console.error(e);
+      const isCustomError = e.message && (e.message.includes("통신 서버") || e.message.includes("AI 튜터"));
+      const errorText = isCustomError 
+        ? e.message 
+        : `이런! 실시간 학사망 통신 상태가 고르지 못하구나. 한 번 더 차분히 물어봐 주겠니? (오류: ${e.message || "연결 불가"})`;
       setMessages([
         ...updatedMessages,
         {
           role: "model" as const,
-          content: `AI 교수 튜터 통신 과부하 혹은 지연 상태입니다. 잠시 후 재입력해 주십시오. (오류: ${e.message || "연결 유실"})`
+          content: errorText
         }
       ]);
     } finally {
